@@ -1,0 +1,17 @@
+/linters/.tox/
+/linters/.mypy_cache/
+/pkg/arch/pkg/
+/pkg/arch/src/
+/src/build/
+/python/build/
+/janus/build/
+/ustreamer
+/ustreamer-dump
+/config.mk
+vgcore.*
+*.sock
+*.so
+*.bin
+*.pkg.tar.xz
+*.pkg.tar.zst
+*.tar.gz
