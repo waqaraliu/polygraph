@@ -185,9 +185,9 @@ int server_listen(server_s *server) {
 }
 
 void server_loop(server_s *server) {
-	LOG_INFO("Starting HTTP eventloop ...");
+	LOG_INFO("Http server starting ...");
 	event_base_dispatch(RUN(base));
-	LOG_INFO("HTTP eventloop stopped");
+	LOG_INFO("HTTP server stopped");
 }
 
 void server_loop_break(server_s *server) {

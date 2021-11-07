@@ -621,7 +621,7 @@ static void _device_open_jpeg_quality(device_s *dev) {
 		MEMSET_ZERO(comp);
 
 		if (xioctl(RUN(fd), VIDIOC_G_JPEGCOMP, &comp) < 0) {
-			LOG_ERROR("Device does not support setting of HW encoding quality parameters");
+			LOG_ERROR("We cannot change image quality of this device, it will be default");
 		} else {
 			comp.quality = dev->jpeg_quality;
 			if (xioctl(RUN(fd), VIDIOC_S_JPEGCOMP, &comp) < 0) {

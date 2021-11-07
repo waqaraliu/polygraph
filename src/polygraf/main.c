@@ -63,9 +63,9 @@ static void *_server_loop_thread(UNUSED void *arg) {
 
 static void _signal_handler(int signum) {
 	switch (signum) {
-		case SIGTERM:	LOG_INFO_NOLOCK("===== Stopping by SIGTERM ====="); break;
-		case SIGINT:	LOG_INFO_NOLOCK("===== Stopping by SIGINT ====="); break;
-		default:		LOG_INFO_NOLOCK("===== Stopping by %d =====", signum); break;
+		case SIGTERM:	LOG_INFO_NOLOCK("===== Terminating ====="); break;
+		case SIGINT:	LOG_INFO_NOLOCK("===== Interrupted ====="); break;
+		default:		LOG_INFO_NOLOCK("===== Interrupted by %d =====", signum); break;
 	}
 	stream_loop_break(_ctx->stream);
 	server_loop_break(_ctx->server);
