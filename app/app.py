@@ -1,5 +1,4 @@
 import subprocess
-from httpsession import main
 from configparser import ConfigParser
 import socket
 import os

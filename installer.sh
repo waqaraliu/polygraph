@@ -15,7 +15,7 @@ sudo python3 get-pip.py
 sudo apt install $PACKAGES -y
 sudo apt install $DEBPACKAGES -y
 #if this opencv version does not work on Rpi then use below one
-pip install opencv-python==4.2.0.34
+pip install opencv-python==4.4.0.42
 #pip install opencv-contrib-python==4.1.0.25
 #now install app
 mkdir /home/pi/tempdir
@@ -44,11 +44,11 @@ if grep -Fq "disable_splash" $CONFIG
 then
 	# Replace the line
 	echo "Modifying disable_splash"
-	sed -i "/disable_splash/c\disable_splash=1" $CONFIG
+	sudo sed -i "/disable_splash/c\disable_splash=1" $CONFIG
 else
 	# Create the definition
 	echo "disable_splash not defined. Creating definition"
-	echo "disable_splash=1" >> $CONFIG
+	sudo sh -c 'echo "disable_splash=1" >> /boot/config.txt'
 fi
 
 # If a line containing "arm_freq" exists
@@ -56,23 +56,11 @@ if grep -Fq "arm_freq" $CONFIG
 then
 	# Replace the line
 	echo "Modifying arm_freq"
-	sed -i "/arm_freq/c\arm_freq=2000" $CONFIG
+	sudo sed -i "/arm_freq/c\arm_freq=2000" $CONFIG
 else
 	# Create the definition
 	echo "arm_freq not defined. Creating definition"
-	echo "arm_freq=2000" >> $CONFIG
-fi
-
-# If a line containing "core_freq" exists
-if grep -Fq "core_freq" $CONFIG
-then
-	# Replace the line
-	echo "Modifying core_freq"
-	sed -i "/core_freq/c\core_freq=550" $CONFIG
-else
-	# Create the definition
-	echo "core_freq not defined. Creating definition"
-	echo "core_freq=550" >> $CONFIG
+	sudo sh -c 'echo "arm_freq=2000" >> /boot/config.txt'
 fi
 
 # If a line containing "over_voltage" exists
@@ -80,11 +68,11 @@ if grep -Fq "over_voltage" $CONFIG
 then
 	# Replace the line
 	echo "Modifying over_voltage"
-	sed -i "/over_voltage/c\over_voltage=6" $CONFIG
+	sudo sed -i "/over_voltage/c\over_voltage=6" $CONFIG
 else
 	# Create the definition
 	echo "over_voltage not defined. Creating definition"
-	echo "over_voltage=6" >> $CONFIG
+	sudo sh -c 'echo "over_voltage=6" >> /boot/config.txt'
 fi
 
 # If a line containing "enable_tvout" exists
@@ -92,14 +80,24 @@ if grep -Fq "enable_tvout" $CONFIG
 then
 	# Replace the line
 	echo "Modifying enable_tvout"
-	sed -i "/enable_tvout/c\enable_tvout" $CONFIG
+	sudo sed -i "/enable_tvout/c\enable_tvout" $CONFIG
 else
 	# Create the definition
 	echo "enable_tvout not defined. Creating definition"
-	echo "enable_tvout" >> $CONFIG
+	sudo sh -c 'echo "enable_tvout" >> /boot/config.txt'
 fi
 
 
+echo "Installing Python Modules"
+pip install zeroconf
+pip install configparser
+# install xterm for app logging display
+sudo apt install xterm -y
+#create auto start desktop file for app 
+sudo sh -c 'echo "[Desktop Entry]" >> /home/pi/.config/autostart/app.desktop'
+sudo sh -c 'echo "Type=Application" >> /home/pi/.config/autostart/app.desktop'
+sudo sh -c 'echo "Name=Polygraf" >> /home/pi/.config/autostart/app.desktop'
+sudo sh -c 'echo "Exec=xterm -hold -e '/usr/bin/python3 /home/pi/polygraf/app.py'" >> /home/pi/.config/autostart/app.desktop'
 echo "Install complete, exiting."
 exit
 #reboot
