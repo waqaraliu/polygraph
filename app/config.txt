@@ -1,0 +1,6 @@
+
+disable_splash=1
+arm_freq=2000
+core_freq=550
+over_voltage=6
+enable_tvout
