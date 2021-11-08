@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
 Name=Polygraf
-Exec=xterm -hold -e '/usr/bin/python3 /home/pi/polygraf/app/app.py'
+Exec=xterm -hold -e 'cd /home/pi/polygraf/app/ && /usr/bin/python3 /home/pi/polygraf/app/app.py'
