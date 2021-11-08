@@ -94,10 +94,7 @@ pip install configparser
 # install xterm for app logging display
 sudo apt install xterm -y
 #create auto start desktop file for app 
-sudo sh -c 'echo "[Desktop Entry]" >> /home/pi/.config/autostart/app.desktop'
-sudo sh -c 'echo "Type=Application" >> /home/pi/.config/autostart/app.desktop'
-sudo sh -c 'echo "Name=Polygraf" >> /home/pi/.config/autostart/app.desktop'
-sudo sh -c 'echo "Exec=xterm -hold -e '/usr/bin/python3 /home/pi/polygraf/app.py'" >> /home/pi/.config/autostart/app.desktop'
+sudo cp /home/pi/polygraf/app.desktop /home/pi/.config/autostart/
 echo "Install complete, exiting."
 exit
-#reboot
+reboot
