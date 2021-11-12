@@ -31,6 +31,7 @@ static void _http_callback_root(struct evhttp_request *request, void *v_server);
 static void _http_callback_static(struct evhttp_request *request, void *v_server);
 static void _http_callback_state(struct evhttp_request *request, void *v_server);
 static void _http_callback_snapshot(struct evhttp_request *request, void *v_server);
+static void _http_callback_vga_broadcast(struct evhttp_request *request, void *v_server);
 
 static void _http_callback_stream(struct evhttp_request *request, void *v_server);
 static void _http_callback_stream_write(struct bufferevent *buf_event, void *v_ctx);
@@ -122,6 +123,8 @@ int server_listen(server_s *server) {
 		assert(!evhttp_set_cb(RUN(http), "/state", _http_callback_state, (void *)server));
 		assert(!evhttp_set_cb(RUN(http), "/snapshot", _http_callback_snapshot, (void *)server));
 		assert(!evhttp_set_cb(RUN(http), "/stream", _http_callback_stream, (void *)server));
+		//vgabroadcaster.jpg
+		assert(!evhttp_set_cb(RUN(http), "/vgabroadcaster.jpg", _http_callback_vga_broadcast, (void *)server));
 	}
 
 	frame_copy(STREAM(blank), EX(frame));
@@ -236,6 +239,9 @@ static int _http_check_run_compat_action(struct evhttp_request *request, void *v
 		goto ok;
 	} else if (action && !strcmp(action, "stream")) {
 		_http_callback_stream(request, v_server);
+		goto ok;
+	} else if(action && !strcmp(action, "vgabroadcaster.jpg")){
+		_http_callback_vga_broadcast(request, v_server);
 		goto ok;
 	}
 
@@ -440,6 +446,57 @@ static void _http_callback_state(struct evhttp_request *request, void *v_server)
 }
 
 static void _http_callback_snapshot(struct evhttp_request *request, void *v_server) {
+	server_s *server = (server_s *)v_server;
+
+	PREPROCESS_REQUEST;
+
+	struct evbuffer *buf;
+	assert((buf = evbuffer_new()));
+	assert(!evbuffer_add(buf, (const void *)EX(frame->data), EX(frame->used)));
+
+	if (server->allow_origin[0] != '\0') {
+		ADD_HEADER("Access-Control-Allow-Origin", server->allow_origin);
+	}
+	ADD_HEADER("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, pre-check=0, post-check=0, max-age=0");
+	ADD_HEADER("Pragma", "no-cache");
+	ADD_HEADER("Expires", "Mon, 3 Jan 2000 12:34:56 GMT");
+
+	char header_buf[256];
+
+#	define ADD_TIME_HEADER(_key, _value) { \
+			snprintf(header_buf, 255, "%.06Lf", _value); \
+			ADD_HEADER(_key, header_buf); \
+		}
+
+#	define ADD_UNSIGNED_HEADER(_key, _value) { \
+			snprintf(header_buf, 255, "%u", _value); \
+			ADD_HEADER(_key, header_buf); \
+		}
+
+	ADD_TIME_HEADER("X-Timestamp", get_now_real());
+
+	ADD_HEADER("X-UStreamer-Online",						bool_to_string(EX(frame->online)));
+	ADD_UNSIGNED_HEADER("X-UStreamer-Dropped",				EX(dropped));
+	ADD_UNSIGNED_HEADER("X-UStreamer-Width",				EX(frame->width));
+	ADD_UNSIGNED_HEADER("X-UStreamer-Height",				EX(frame->height));
+	ADD_TIME_HEADER("X-UStreamer-Grab-Timestamp",			EX(frame->grab_ts));
+	ADD_TIME_HEADER("X-UStreamer-Encode-Begin-Timestamp",	EX(frame->encode_begin_ts));
+	ADD_TIME_HEADER("X-UStreamer-Encode-End-Timestamp",		EX(frame->encode_end_ts));
+	ADD_TIME_HEADER("X-UStreamer-Expose-Begin-Timestamp",	EX(expose_begin_ts));
+	ADD_TIME_HEADER("X-UStreamer-Expose-Cmp-Timestamp",		EX(expose_cmp_ts));
+	ADD_TIME_HEADER("X-UStreamer-Expose-End-Timestamp",		EX(expose_end_ts));
+	ADD_TIME_HEADER("X-UStreamer-Send-Timestamp",			get_now_monotonic());
+
+#	undef ADD_UNSUGNED_HEADER
+#	undef ADD_TIME_HEADER
+
+	ADD_HEADER("Content-Type", "image/jpeg");
+
+	evhttp_send_reply(request, HTTP_OK, "OK", buf);
+	evbuffer_free(buf);
+}
+
+static void _http_callback_vga_broadcast(struct evhttp_request *request, void *v_server) {
 	server_s *server = (server_s *)v_server;
 
 	PREPROCESS_REQUEST;
